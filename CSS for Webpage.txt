@@ -1,0 +1,267 @@
+/* =============================================
+   BRIDGE AI SOLUTIONS - MAIN STYLESHEET
+   Colour Scheme:
+   Dark Navy:  #1a2744
+   Cyan/Teal:  #2a8fa8
+   Light Teal: #3ab5d4
+   White:      #ffffff
+   Error Red:  #e74c3c
+   Success:    #2ecc71
+   
+   Font: use Google Fonts or system default
+   ============================================= */
+
+
+/* =============================================
+   GLOBAL STYLES - affects all pages
+   Do not edit without telling the group
+   ============================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1a2744;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* Shared header across all pages */
+header {
+    background-color: #1a2744;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #2a8fa8;
+}
+
+header img {
+    height: 60px;
+    width: auto;
+}
+
+/* Shared navigation */
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+    margin-left: auto;
+}
+
+nav ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #2a8fa8;
+}
+
+/* Shared footer across all pages */
+footer {
+    background-color: #1a2744;
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+    border-top: 2px solid #2a8fa8;
+    margin-top: auto;
+}
+
+
+/* =============================================
+   HOME PAGE - Max
+   Target using: body.home-page
+   ============================================= */
+
+body.home-page {
+    /* Max - add your page background/theme here */
+}
+
+body.home-page main {
+    /* Max - add your main content styles here */
+}
+
+/* Max - add your animation styles below */
+
+
+
+
+/* =============================================
+   CONTACT PAGE - Leon
+   Target using: body.contact-page
+   Colours: navy background, cyan form box
+   ============================================= */
+
+body.contact-page main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    /* Leon - add background image below */
+    background-image: url('../images/background.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+body.contact-page h1 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* The box that wraps the form */
+body.contact-page .form-container {
+    background-color: rgba(26, 39, 68, 0.9);
+    border: 1px solid #2a8fa8;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 550px;
+}
+
+/* All labels inside the form */
+body.contact-page label {
+    display: block;
+    color: #2a8fa8;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+/* All inputs and textarea inside the form */
+body.contact-page input,
+body.contact-page textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: #0f1a30;
+    border: 1px solid #2a8fa8;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* When user clicks into a field */
+body.contact-page input:focus,
+body.contact-page textarea:focus {
+    outline: none;
+    border-color: #3ab5d4;
+    box-shadow: 0 0 8px rgba(42, 143, 168, 0.5);
+}
+
+/* Textarea specific */
+body.contact-page textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+/* Error messages beneath each field */
+body.contact-page .error-msg {
+    display: block;
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+    min-height: 16px;
+}
+
+/* Submit button */
+body.contact-page button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    background-color: #2a8fa8;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+body.contact-page button[type="submit"]:hover {
+    background-color: #3ab5d4;
+    transform: translateY(-2px);
+}
+
+/* Success message - hidden by default, JS will show it */
+body.contact-page #successMessage {
+    display: none;
+    background-color: #2ecc71;
+    color: #ffffff;
+    text-align: center;
+    padding: 16px;
+    border-radius: 6px;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+/* =============================================
+   SERVICES PAGE - Vale
+   Target using: body.services-page
+   ============================================= */
+
+body.services-page {
+    /* Vale - add your page background/theme here */
+}
+
+body.services-page main {
+    /* Vale - add your main content styles here */
+}
+
+/* Vale - add your image/gallery styles below */
+
+
+
+
+/* =============================================
+   ABOUT PAGE - Christopher
+   Target using: body.about-page
+   ============================================= */
+
+body.about-page {
+    /* Christopher - add your page background/theme here */
+}
+
+body.about-page main {
+    /* Christopher - add your main content styles here */
+}
+
+/* Christopher - add your FAQ/review styles below */
+
+
+
+
+/* =============================================
+   RESPONSIVE - applies to all pages
+   Adjusts layout for smaller screens
+   Do not edit without telling the group
+   ============================================= */
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 12px;
+        margin-left: 0;
+        text-align: center;
+    }
+
+    body.contact-page .form-container {
+        padding: 24px;
+    }
+}
