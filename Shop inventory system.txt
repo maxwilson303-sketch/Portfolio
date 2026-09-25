@@ -1,0 +1,315 @@
+import datetime
+import matplotlib.pyplot as plt
+import csv
+
+class Book:
+    def __init__(self, book_id, author, title, format_, publisher, cost, stock, genre):
+        self.id = book_id
+        self.author = author
+        self.title = title
+        self.format_ = format_
+        self.publisher = publisher
+        self.price = float(cost)
+        self.stock = int(float(stock))
+        self.original_stock = int(float(stock))
+        self.genre = genre if genre else "unknown"
+
+class Inventory: 
+    def __init__(self):
+        self.books = {}
+        self.sales_log = []
+
+    def check_availability(self, search_term): # checks for book availability
+        search_term = search_term.lower()
+
+        matched = [
+            book for book in self.books.values()
+            if search_term in book.title.lower()
+        ]
+
+        if not matched:
+            print("No matches found")
+            return
+        print("\n Search results:")
+        print("-" * 60)
+
+        for book in matched:
+            status = "In stock" if book.stock > 0 else "Out of stock"
+            print(f"{book.id} | {book.title} by {book.author}")
+            print(f"Stock: {book.stock} | {status}")
+            print("-" * 60)
+
+    def load_books_from_csv(self, filename): #loads the books from the csv file for the python to access it
+        try:
+            with open(filename, newline='', encoding='utf-8-sig') as csvfile:
+                reader = csv.DictReader(csvfile)
+                reader.fieldnames = [f.strip() for f in reader.fieldnames]
+
+                expected_headers = ['Author', 'Title', 'Format', 'Publisher', 'Cost', 'Stock', 'Genre']
+                missing = [h for h in expected_headers if h not in reader.fieldnames]
+                if missing:
+                    print(f"Headers dont match format")
+                    print("Expected:", expected_headers)
+                    print("Missing:", missing)
+                    return
+
+                book_id = 1
+                for row in reader:
+                    try:
+                        row = {k.strip(): (v.strip() if v is not None else "") for k, v in row.items() if k}
+                        book = Book(
+                            book_id,
+                            row["Author"],
+                            row["Title"],
+                            row["Format"],
+                            row["Publisher"],
+                            row["Cost"],
+                            row["Stock"],
+                            row.get("Genre", "")
+                        )
+                        self.books[book_id] = book
+                        book_id += 1
+                    except Exception as e:
+                        print(f"Skipping bad row: {row} | Error: {e}")
+
+            print(f"Books loaded successfully. ({len(self.books)} books)")
+
+        except FileNotFoundError:
+            print("File not found. Make sure BooksData.csv is in the same folder.")
+        except Exception as e:
+            print(f"Error loading CSV: {e}")
+
+    def view_books(self): #allows the user to view all the books in the inventory
+        if not self.books:
+            print("Inventory is empty.")
+            return
+
+        print("\nCurrent Inventory (Sorted by Author):")
+        print("-" * 60)
+
+        sorted_books = sorted(self.books.values(), key=lambda b: b.author.lower())
+
+        for book in sorted_books:
+            print(f"ID: {book.id}")
+            print(f"Author: {book.author}")
+            print(f"Title: {book.title}")
+            print(f"Format: {book.format_}")
+            print(f"Publisher: {book.publisher}")
+            print(f"Genre: {book.genre}")
+            print(f"Price: {book.price:.2f}")
+            print(f"Stock: {book.stock}")
+            print("-" * 80)
+    def add_book(self, author, title, format_, publisher, cost, stock, genre): #Allows the users to add books to the stock levels
+        new_id = max(self.books.keys(), default=0) + 1
+        self.books[new_id] = Book(new_id, author, title, format_, publisher, cost, stock, genre)
+        print(f"Added book with ID: {new_id}")
+
+    def edit_book(self, book_id, price=None, stock=None): #Allows the user to edit the existing books that are in the inventory
+        book = self.books.get(book_id)
+        if not book:
+            print("Book ID not found")
+            return
+        if price is not None:
+            book.price = price
+        if stock is not None:
+            book.stock = stock
+        print(f"Updated book ID {book_id}")
+
+    def sell_book(self, book_id, quantity): #Allows the user to sell the book
+        book = self.books.get(book_id)
+        if not book:
+            print("Book ID not found")
+            return
+        if book.stock < quantity:
+            print("Not enough stock")
+            return
+
+        book.stock -= quantity
+        total = book.price * quantity
+        self.sales_log.append({
+            "book_id": book_id,
+            "title": book.title,
+            "quantity": quantity,
+            "total": total,
+            "date": datetime.datetime.now()
+        })
+        print(f"Sold {quantity} copies of book ID '{book.title}' (ID {book_id})")
+
+    def refund_book(self, book_id, quantity): #Allows the user to refund the book that was sold
+        book = self.books.get(book_id)
+        if not book:
+            print("Book ID not found")
+            return
+
+        book.stock += quantity
+        total = book.price * quantity
+        self.sales_log.append({
+            "book_id": book_id,
+            "title": book.title,
+            "quantity": -quantity,
+            "total": -total,
+            "date": datetime.datetime.now()
+        })
+        print(f"Refunded {quantity} copies of '{book.title}' (ID {book_id})'")
+
+    def monthly_report(self, year, month): #Generate the monthly report 
+
+        report = [
+            s for s in self.sales_log
+            if s['date'].year == year and s['date'].month == month
+        ]
+        print(f"\n Monthly Report for {month}/{year}\n")
+        print("-" * 90)
+
+        if not report:
+            print("No book sales have been recorded for this month.")
+            return
+
+        total_sales = sum(s['total'] for s in report)
+
+        titles = sorted([s['title'] for s in report])
+
+        total_stock = sum(book.stock for book in self.books.values())
+
+        prices = [book.price for book in self.books.values()]
+        avg_cost = sum(prices) / len(prices) if prices else 0
+
+        # Count how many books there are in each genre
+        genre_counts = {}
+        for book in self.books.values():
+            genre = book.genre.lower().strip()
+            genre_counts[genre] = genre_counts.get(genre, 0) + book.stock
+
+        # Print detailed sales line graph
+        for r in report:
+            date_str = r['date'].strftime('%d/%m/%Y')
+            print(f"{date_str}: {r['title']} | qty {r['quantity']} | £{r['total']:.2f}")
+
+        print("-" * 90)
+        print(f"Total books in Stock: {total_stock}")
+        print(f"Titles Sold this Month: {','.join(titles)}")
+        print(f"Average Book Cost: {avg_cost:.2f}")
+        print(f"Total Sales Revenue: {total_sales:.2f}")
+        print("-" * 90)
+
+        # Stock Change Report
+        print("\n Changes in Stock since load:")
+        for book in self.books.values():
+            change = book.stock - book.original_stock
+            if change > 0:
+                status = f"{change} increase"
+            elif change < 0:
+                status = f"{-change} decrease"
+            else:
+                status = "No change"
+            print(f"{book.title[:40]:40} {status}")
+            print("-" * 90)
+
+        # Breakdown of Books by Genre with Barchart
+        genres = list(genre_counts.keys())
+        counts = list(genre_counts.values())
+
+        daily_totals = {}
+        for s in report:
+            day = s['date'].day
+            daily_totals[day] = daily_totals.get(day, 0) + s['total']
+
+        days = sorted(daily_totals.keys())
+        totals = [daily_totals.get(d, 0) for d in days]
+
+        plt.figure()
+        plt.subplot(1, 2, 1)
+        plt.bar(genres, counts)
+        plt.xlabel('Genre')
+        plt.ylabel('Books by Genre')
+        plt.xticks(rotation=45, ha = 'right')
+
+        plt.subplot(1, 2, 2)
+        plt.bar(days, totals)
+        plt.xlabel('Day')
+        plt.ylabel('Sales Total (£)')
+        plt.title(f'Daily Sales ({month}/{year})')
+        plt.grid(True)
+
+        plt.tight_layout()
+        plt.show()
+
+def menu(): #Makes a menu for the user to navigate from
+    inventory = Inventory()
+    inventory.load_books_from_csv('BooksData.csv')
+
+    while True:
+        print("\n--- Bookstore Menu ---\n")
+        print("1. View Inventory")
+        print("2. Add Book")
+        print("3. Edit Book")
+        print("4. Sell Book")
+        print("5. Refund Books")
+        print("6. Monthly report")
+        print("7. Check Availability of Books")
+        print("8. Exit")
+
+        choice = (input("Enter your choice: "))
+
+        if choice == '1':
+            inventory.view_books()
+
+        elif choice == '2':
+            author = input("Enter your author: ")
+            title = input("Enter your title: ")
+            format_ = input("format (hb/pb: ")
+            publisher = input("Enter the publisher: ")
+            cost = float(input("Enter the cost: "))
+            stock = int(input("Enter the number of stock: "))
+            genre = input("Enter the genre: ")
+            inventory.add_book(author, title, format_, publisher, cost, stock, genre)
+
+        elif choice == '3':
+            try:
+                book_id = int(input("Enter the book ID to edit: "))
+                price_in = input("Enter the new price (leave blank to skip): ")
+                stock_in = input("Enter the new stock (leave blank to skip): ").strip()
+                stock = int(stock_in) if stock_in else None
+                price = float(price_in) if price_in else None
+                inventory.edit_book(book_id, price, stock)
+            except ValueError:
+                print("Invalid input. Please try again.")
+
+        elif choice == '4':
+            try:
+                book_id = int(input("Enter the book ID to sell: "))
+                quantity = int(input("Quantity: "))
+                inventory.sell_book(book_id, quantity)
+            except ValueError:
+                print("Invalid input. Please try again.")
+
+        elif choice == '5':
+            try:
+                book_id = int(input("Enter the book ID to refund: "))
+                quantity = int(input("Quantity: "))
+                inventory.refund_book(book_id, quantity)
+            except ValueError:
+                print("Invalid input. Please try again.")
+
+        elif choice == '6':
+            try:
+                year = int(input("Enter the year: "))
+                month = int(input("Enter the month (1-12): "))
+                inventory.monthly_report(year, month)
+            except ValueError:
+                print("Invalid input. Please try again.")
+
+        elif choice == '7':
+            search = input("Enter title or author: ")
+            inventory.check_availability(search)
+
+        elif choice == '8':
+            print("Goodbye!")
+            break
+
+        else:
+            print("Invalid option, try again.")
+
+
+if __name__ == "__main__":
+    menu()
